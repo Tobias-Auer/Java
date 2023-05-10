@@ -1,0 +1,29 @@
+#§0: Schwarz
+#§1: Dunkelblau
+#§2: Dunkelgrün
+#§3: Dunkelaqua
+#§4: Dunkelrot
+#§5: Dunkelviolett
+#§6: Gold
+#§7: Grau
+#§8: Dunkelgrau
+#§9: Blau
+#§a-d: die helle Version der Farbe hinter der jeweils zugehörigen Ziffer
+#§e: Gelb
+#§f: Weiß
+#§r: RESET
+
+# %player% = Player name
+
+#Use for normal players
+msgJoin: "§3[§2+§3] §r%player%"
+msgQuit: "§3[§c-§3] §r%player%"
+
+# Use for special players
+otherMsgs:
+  _Tobias4444:
+    msgJoin: "§3[§2+§3] §6§l%player%"
+    msgQuit: "§3[§c-§3] §6§l%player%"
+  notch:
+    msgJoin: ""
+    msgQuit: ""

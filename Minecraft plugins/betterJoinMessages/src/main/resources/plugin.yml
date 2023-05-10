@@ -1,0 +1,4 @@
+name: betterJoinMessages
+version: '${project.version}'
+main: de.tobias.betterjoinmessages.BetterJoinMessages
+api-version: 1.19
