@@ -1,0 +1,4 @@
+name: SpawnElytra
+version: '${project.version}'
+main: de.tobias.spawnelytra.SpawnElytra
+api-version: 1.19
