@@ -1,0 +1,4 @@
+name: easyNewCraftingRecipes
+version: '${project.version}'
+main: de.tobias.easynewcraftingrecipes.EasyNewCraftingRecipes
+api-version: 1.19

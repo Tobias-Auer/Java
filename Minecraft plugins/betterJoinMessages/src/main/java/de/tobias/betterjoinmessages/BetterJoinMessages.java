@@ -15,7 +15,6 @@ public final class BetterJoinMessages extends JavaPlugin {
         if (!configFile.exists()) {
             saveDefaultConfig();
         }
-        getLogger().info("hi");
         YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
 
         PluginManager pluginManager = Bukkit.getPluginManager();
