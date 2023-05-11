@@ -1,7 +1,12 @@
 package de.tobias.spawnelytra.listeners;
 
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -22,8 +27,9 @@ public class SpawnElytraListener implements Listener {
     public SpawnElytraListener(Plugin plugin) {
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             for (Player player : Bukkit.getWorld("world").getPlayers()) {
-                if (player.getGameMode() == GameMode.SURVIVAL) {
-                    player.setAllowFlight(isInSpawnRadius(player));
+                if (player.getGameMode() == GameMode.SURVIVAL && isInSpawnRadius(player)) {
+                    player.setAllowFlight(true);
+                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("§bSpawnElytra available §r| §3press <space> twice to fly"));
                 }
                 if (flyingPlayers.contains(player) && !player.getLocation().getBlock().getRelative(DOWN).getType().isAir()) {
                     player.setFlying(false);
@@ -47,6 +53,8 @@ public class SpawnElytraListener implements Listener {
         event.setCancelled(true);
         player.setGliding(true);
         flyingPlayers.add(player);
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(""));
+
     }
 
     @EventHandler
@@ -83,6 +91,9 @@ public class SpawnElytraListener implements Listener {
         }
 
         int spawnRadius = 20;
-        return (player.getLocation().distance(player.getWorld().getSpawnLocation()) <= spawnRadius && !player.getLocation().getBlock().getRelative(DOWN).getType().isAir());
+
+
+        return (player.getLocation().distance(player.getWorld().getSpawnLocation()) <= spawnRadius &&
+                !player.getLocation().getBlock().getRelative(DOWN).getType().isAir());
     }
 }
