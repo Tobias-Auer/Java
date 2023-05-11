@@ -1,0 +1,9 @@
+NameSpacedKey:
+  item: "LIGHT"
+  count: 4
+  top_row: "AAA"
+  middle_row: "ABA"
+  bottom_row: "AAA"
+  legend:
+    A: "GLASS_PANE"
+    B: "TORCH"
