@@ -1,0 +1,4 @@
+name: AutoShutdown
+version: '${project.version}'
+main: de.tobias.autoshutdown.AutoShutdown
+api-version: 1.19
