@@ -1,0 +1,4 @@
+name: PermissionSystem
+version: '${project.version}'
+main: de.tobias.permissionsystem.PermissionSystem
+api-version: 1.19
