@@ -2,3 +2,7 @@ name: PermissionSystem
 version: '${project.version}'
 main: de.tobias.permissionsystem.PermissionSystem
 api-version: 1.19
+commands:
+  permission:
+    description: Mangae the permisssions for all player
+    usage: /permission <add|remove> <player> <permission> plugin.yml file

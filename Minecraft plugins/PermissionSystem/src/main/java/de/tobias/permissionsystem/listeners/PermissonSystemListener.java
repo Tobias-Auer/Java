@@ -1,94 +1,60 @@
 package de.tobias.permissionsystem.listeners;
 
+import de.tobias.permissionsystem.PermissionSystem;
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.permissions.PermissionAttachment;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.bukkit.Bukkit.getLogger;
 
-public class PermissonSystemListener implements Listener {
+public class PermissonSystemListener implements Listener{
 
     private final YamlConfiguration config;
     private final File configFile;
+    private final PermissionSystem plugin;
+    private final AttachmentManager attachmentManager;
 
-
-
-
-
-    // TODO: Implement commands
-    // TODO: Implement API methods
-
-    public PermissonSystemListener(YamlConfiguration config, File configFile) {
+    public PermissonSystemListener(YamlConfiguration config, File configFile, AttachmentManager attachmentManager, PermissionSystem plugin) {
         this.config = config;
         this.configFile = configFile;
+        this.plugin = plugin;
+        this.attachmentManager = attachmentManager;
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) throws IOException {
         Player player = event.getPlayer();
         UUID playerUuid = player.getUniqueId();
-        getLogger().info("START CHECKING");
         if (!config.getKeys(false).contains(playerUuid.toString())) {
-            config.set(playerUuid + ".permissons", new ArrayList<>());
+            config.set(String.valueOf(playerUuid), new ArrayList<>());
             config.save(configFile);
         }
-        addPermission(playerUuid, "gamemmode");
-        addPermission(playerUuid, "shutdown");
-        getLogger().info(checkPermission(playerUuid, "gamemmode"));;
-        getLogger().info(checkPermission(playerUuid, "shutdown"));;
-        getLogger().info(checkPermission(playerUuid, "lol"));
-        removePermission(playerUuid, "gamemmode");
-        getLogger().info(checkPermission(playerUuid, "gamemmode"));;
-    }
-
-
-    public void addPermission(UUID uuid, String permission) {
-        try {
-            List<String> existingList = config.getStringList(uuid + ".permissons");
-            existingList.add(permission);
-            config.set(uuid + ".permissons", existingList);
-
-            config.save(configFile);
-            getLogger().info("Added permission: " + permission);
-            getLogger().info("UUID: " + uuid);
-            getLogger().info("Player: " + Bukkit.getOfflinePlayer(uuid).getName());
-        } catch (IOException e) {
-            getLogger().info("FAILED TO ADD: " + permission);
-            getLogger().info("ERROR: " + e.getMessage());
-
+        PermissionAttachment attachment = player.addAttachment(plugin);
+        for (String permission : config.getStringList(playerUuid.toString())) {
+            attachment.setPermission(permission, true);
+            getLogger().info("Added permission to player (onJoin): " + permission);
         }
+
+        player.recalculatePermissions();
+        attachmentManager.addAttachment(player, attachment);
     }
 
-    public void removePermission(UUID uuid, String permission) {
-        try {
-            List<String> existingList = config.getStringList(uuid + ".permissons");
-            existingList.remove(permission);
-            config.set(uuid + ".permissons", existingList);
-
-            config.save(configFile);
-            getLogger().info("REMOVED permission: " + permission);
-            getLogger().info("UUID: " + uuid);
-            getLogger().info("Player: " + Bukkit.getOfflinePlayer(uuid).getName());
-        } catch (IOException e) {
-            getLogger().info("FAILED TO REMOVE: " + permission);
-            getLogger().info("UUID: " + uuid);
-            getLogger().info("Player: " + Bukkit.getOfflinePlayer(uuid).getName());
-            getLogger().info("ERROR: " + e.getMessage());
-        }
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        attachmentManager.removeAttachment(player);
     }
 
-    public String checkPermission(UUID uuid, String permission) {
-        List<String> existingList = config.getStringList(uuid + ".permissons");
-        getLogger().info("Checking "+ permission + "for "+ Bukkit.getOfflinePlayer(uuid).getName());
-        return String.valueOf(existingList.contains(permission));
-    }
 }
