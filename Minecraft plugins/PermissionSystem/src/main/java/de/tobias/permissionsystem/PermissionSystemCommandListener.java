@@ -1,15 +1,20 @@
 package de.tobias.permissionsystem;
 
 import de.tobias.permissionsystem.listeners.AttachmentManager;
+import org.bukkit.block.CommandBlock;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+
+import static org.bukkit.Bukkit.getLogger;
 
 public class PermissionSystemCommandListener implements CommandExecutor {
     private final YamlConfiguration config;
@@ -29,7 +34,24 @@ public class PermissionSystemCommandListener implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-
+        if (command.getName().equals("permission")) {
+            if (sender instanceof Player) {
+                Player playerObject = (Player) sender;
+                if (!playerObject.isPermissionSet("admin.manage.playerPermissions")) {
+                    getLogger().info("Sender has no permission");
+                    sender.sendMessage("§4[ERROR] Du hast keine Berechtigung diesen Befehl auszuführen!");
+                    return true;
+                }
+            } else if (!(sender.getClass().getName().equals("com.destroystokyo.paper.console.TerminalConsoleCommandSender"))) {
+                getLogger().info(sender.getClass().getName());
+                getLogger().info("Sender has no permission");
+                sender.sendMessage("§4[ERROR] Du hast keine Berechtigung diesen Befehl auszuführen!");
+                return true;
+            }
+        }else {
+            getLogger().info("Not a player or ServerConsole!");
+        }
+        getLogger().info("Sender has permission");
         String permission = null;
         String action;
         UUID targetUuid;
@@ -43,7 +65,7 @@ public class PermissionSystemCommandListener implements CommandExecutor {
             sender.sendMessage("§4[ERROR] Der Spieler " + args[1] + " war noch nicht auf dem Server!");
         }
         if (!action.equals("list")) {
-            permission = args[2].toLowerCase();
+            permission = args[2];
         }
 
 
@@ -102,5 +124,4 @@ public class PermissionSystemCommandListener implements CommandExecutor {
         return true;
     }
 
-// TODO MAke onenable, make removepermission command
 }

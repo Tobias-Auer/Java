@@ -6,4 +6,4 @@ commands:
   permission:
     description: Mangae the permisssions for all player
     usage: /permission <add|remove|check> <player> <permission>
-    permission: admin.gamemode
+
