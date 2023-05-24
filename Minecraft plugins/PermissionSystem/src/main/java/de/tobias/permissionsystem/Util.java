@@ -3,9 +3,12 @@ package de.tobias.permissionsystem;
 import de.tobias.permissionsystem.listeners.AttachmentManager;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -139,12 +142,35 @@ public class Util {
         List<String> list = null;
         try {
             list = config.getStringList(uuid.toString());
+            Player player = (Player) getPlayerFromUuid(uuid);
+            for (PermissionAttachmentInfo attachment : player.getEffectivePermissions()) {
+                if (attachment.getValue()) {
+                    list.add(attachment.getPermission());
+                }
+            }
         } catch (Exception e) {
             getLogger().info("listAllPermissionFromPlayer failed, because " + uuid + " caused following exception");
             getLogger().info(e.toString());
         }
 
         return list;
+    }
+
+    public static boolean check(CommandSender sender) {
+        if (sender instanceof ConsoleCommandSender) {
+            return true;
+        }
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            sender.sendMessage("Player recognized");
+            sender.sendMessage(String.valueOf(player.hasPermission("admin.manage.playerPermission")));
+            sender.sendMessage(String.valueOf(player.isPermissionSet("admin.manage.playerPermission")));
+            sender.sendMessage(String.valueOf(player.hasPermission("lolwtf")));
+            sender.sendMessage(String.valueOf(player.isPermissionSet("lolwtf")));
+            return player.hasPermission("admin.manage.playerPermission");
+        }
+
+        return false;
     }
 }
 //case "removepermission":
