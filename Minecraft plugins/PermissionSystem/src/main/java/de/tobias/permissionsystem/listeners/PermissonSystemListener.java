@@ -41,14 +41,22 @@ public class PermissonSystemListener implements Listener{
             config.set(String.valueOf(playerUuid), new ArrayList<>());
             config.save(configFile);
         }
+//        PermissionAttachment attachment = player.addAttachment(plugin);
+//        for (String permission : config.getStringList(playerUuid.toString())) {
+//            attachment.setPermission(permission, true);
+//            getLogger().info("Added permission to player (onJoin): " + permission);
+//        }
+//
+//        attachmentManager.init(player, attachment);
         PermissionAttachment attachment = player.addAttachment(plugin);
-        for (String permission : config.getStringList(playerUuid.toString())) {
-            attachment.setPermission(permission, true);
-            getLogger().info("Added permission to player (onJoin): " + permission);
-        }
-
+        attachment.unsetPermission("admin.fly");
+//        player.removeAttachment(attachment);
+        player.sendMessage("Die Berechtigung " + "admin.fly" + " wurde entfernt.");
+        attachment.unsetPermission("admin.gamemode");
+        player.removeAttachment(attachment);
+        player.sendMessage("Die Berechtigung " + "admin.gamemode" + " wurde entfernt.");
         player.recalculatePermissions();
-        attachmentManager.addAttachment(player, attachment);
+
     }
 
     @EventHandler

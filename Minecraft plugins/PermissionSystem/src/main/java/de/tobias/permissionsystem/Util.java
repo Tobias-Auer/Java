@@ -12,6 +12,7 @@ import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,10 +46,7 @@ public class Util {
                 getLogger().info("Player: " + Bukkit.getOfflinePlayer(uuid).getName());
                 Player player = Bukkit.getPlayer(uuid);
                 if (player != null) {
-                    PermissionAttachment attachment = player.addAttachment(plugin);
-                    attachment.setPermission(permission, true);
-                    attachmentManager.addAttachment(player, attachment);
-                    player.recalculatePermissions();
+                    AttachmentManager.addPermission(player, permission);
                     getLogger().info("Added permission to player: " + permission);
                 } else {
                     getLogger().info("Player is offline. Permission will be applied as soon as he joins the server.");
@@ -80,10 +78,8 @@ public class Util {
 
                 Player player = Bukkit.getPlayer(uuid);
                 if (player.isOnline()) {
-                    PermissionAttachment attachment = player.addAttachment(plugin);
-                    attachment.unsetPermission(permission);
+                    AttachmentManager.removePermission(player, permission);
                     player.recalculatePermissions();
-                    attachmentManager.removeAttachment(player);
                     getLogger().info("Removed permission from player: " + permission);
                 } else {
                     getLogger().info("Player is offline. Permission will be removed as soon as he join the server");
@@ -99,18 +95,6 @@ public class Util {
             return false;
         }
         return true;
-    }
-
-    public static boolean checkPermission(UUID uuid, String permission) {
-        OfflinePlayer offlinePlayer = getPlayerFromUuid(uuid);
-
-        if (offlinePlayer == null || !offlinePlayer.isOnline()) {
-            getLogger().info("checkPermission for " + permission + " failed, because " + offlinePlayer + " is not online");
-            return false;
-        }
-
-        Player player = (Player) offlinePlayer;
-        return player.isPermissionSet(permission);
     }
 
     public static OfflinePlayer getPlayerFromUuid(UUID uuid) {
@@ -139,22 +123,25 @@ public class Util {
     }
 
     public static List<String> listAllPermissionFromPlayer(UUID uuid) {
-        List<String> list = null;
+        List<String> list = new ArrayList<>();
         try {
-            list = config.getStringList(uuid.toString());
             Player player = (Player) getPlayerFromUuid(uuid);
             for (PermissionAttachmentInfo attachment : player.getEffectivePermissions()) {
                 if (attachment.getValue()) {
-                    list.add(attachment.getPermission());
+                    if (attachment.getPermission().startsWith("admin.")) {
+                        list.add(attachment.getPermission());
+                    }
+
                 }
             }
         } catch (Exception e) {
-            getLogger().info("listAllPermissionFromPlayer failed, because " + uuid + " caused following exception");
+            getLogger().info("listAllPermissionFromPlayer failed, because " + uuid + " caused the following exception:");
             getLogger().info(e.toString());
         }
 
         return list;
     }
+
 
     public static boolean check(CommandSender sender) {
         if (sender instanceof ConsoleCommandSender) {

@@ -8,13 +8,23 @@ import java.util.Map;
 import java.util.UUID;
 
 public class AttachmentManager {
-    private Map<UUID, PermissionAttachment> attachments = new HashMap<>();
+    private static final Map<UUID, PermissionAttachment> attachments = new HashMap<>();
 
-    public void addAttachment(Player player, PermissionAttachment attachment) {
-        UUID playerUUID = player.getUniqueId();
-        removeAttachment(player); // Entferne vorhandenes Attachment, falls vorhanden
-        attachments.put(playerUUID, attachment);
+    public static void addPermission(Player player, String permission) {
+        PermissionAttachment pperms = attachments.get(player.getUniqueId());
+        pperms.setPermission(permission, true);
+        player.recalculatePermissions();
     }
+    public static void removePermission(Player player, String permission) {
+        attachments.get(player.getUniqueId()).unsetPermission(permission);
+
+        player.recalculatePermissions();
+    }
+
+    public PermissionAttachment getAttachment(UUID uuid) {
+        return attachments.get(uuid);
+    }
+
 
     public void removeAttachment(Player player) {
         UUID playerUUID = player.getUniqueId();
@@ -23,5 +33,9 @@ public class AttachmentManager {
             player.removeAttachment(attachment);
             player.recalculatePermissions();
         }
+    }
+
+    public void init(Player player, PermissionAttachment attachment) {
+        attachments.put(player.getUniqueId(), attachment);
     }
 }
