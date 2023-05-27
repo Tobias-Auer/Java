@@ -12,7 +12,6 @@ import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,7 +45,10 @@ public class Util {
                 getLogger().info("Player: " + Bukkit.getOfflinePlayer(uuid).getName());
                 Player player = Bukkit.getPlayer(uuid);
                 if (player != null) {
-                    AttachmentManager.addPermission(player, permission);
+                    PermissionAttachment attachment = attachmentManager.getAttachment(uuid);
+                    attachment.setPermission(permission, true);
+
+                    player.recalculatePermissions();
                     getLogger().info("Added permission to player: " + permission);
                 } else {
                     getLogger().info("Player is offline. Permission will be applied as soon as he joins the server.");
@@ -78,8 +80,10 @@ public class Util {
 
                 Player player = Bukkit.getPlayer(uuid);
                 if (player.isOnline()) {
-                    AttachmentManager.removePermission(player, permission);
+                    PermissionAttachment attachment = player.addAttachment(plugin);
+                    attachment.unsetPermission(permission);
                     player.recalculatePermissions();
+                    attachmentManager.removeAttachment(player);
                     getLogger().info("Removed permission from player: " + permission);
                 } else {
                     getLogger().info("Player is offline. Permission will be removed as soon as he join the server");
@@ -96,6 +100,7 @@ public class Util {
         }
         return true;
     }
+
 
     public static OfflinePlayer getPlayerFromUuid(UUID uuid) {
         try {
@@ -123,25 +128,17 @@ public class Util {
     }
 
     public static List<String> listAllPermissionFromPlayer(UUID uuid) {
-        List<String> list = new ArrayList<>();
+        List<String> list = null;
         try {
-            Player player = (Player) getPlayerFromUuid(uuid);
-            for (PermissionAttachmentInfo attachment : player.getEffectivePermissions()) {
-                if (attachment.getValue()) {
-                    if (attachment.getPermission().startsWith("admin.")) {
-                        list.add(attachment.getPermission());
-                    }
-
-                }
-            }
+            list = config.getStringList(uuid.toString());
+            return list;
         } catch (Exception e) {
-            getLogger().info("listAllPermissionFromPlayer failed, because " + uuid + " caused the following exception:");
+            getLogger().info("listAllPermissionFromPlayer failed, because " + uuid + " caused following exception");
             getLogger().info(e.toString());
         }
 
         return list;
     }
-
 
     public static boolean check(CommandSender sender) {
         if (sender instanceof ConsoleCommandSender) {
@@ -156,7 +153,6 @@ public class Util {
             sender.sendMessage(String.valueOf(player.isPermissionSet("lolwtf")));
             return player.hasPermission("admin.manage.playerPermission");
         }
-
         return false;
     }
 }
