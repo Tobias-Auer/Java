@@ -11,9 +11,10 @@ import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import static org.bukkit.Bukkit.getLogger;
 
@@ -30,7 +31,7 @@ public class Util {
         Util.attachmentManager = attachmentManager;
     }
 
-    public static boolean addPermissionToPlayer(UUID uuid, String permission, List<String> existingList) {
+    public boolean addPermissionToPlayer(UUID uuid, String permission, List<String> existingList) {
         try {
             List<String> playerPerms = config.getStringList(uuid.toString());
             if (playerPerms.contains(permission)) {
@@ -66,7 +67,7 @@ public class Util {
     }
 
 
-    public static boolean removePermissionFromPlayer(UUID uuid, String permission) {
+    public boolean removePermissionFromPlayer(UUID uuid, String permission) {
         try {
             List<String> playerPerms = config.getStringList(uuid.toString());
             if (playerPerms.contains(permission)) {
@@ -83,7 +84,6 @@ public class Util {
                     PermissionAttachment attachment = player.addAttachment(plugin);
                     attachment.unsetPermission(permission);
                     player.recalculatePermissions();
-                    attachmentManager.removeAttachment(player);
                     getLogger().info("Removed permission from player: " + permission);
                 } else {
                     getLogger().info("Player is offline. Permission will be removed as soon as he join the server");
@@ -102,7 +102,7 @@ public class Util {
     }
 
 
-    public static OfflinePlayer getPlayerFromUuid(UUID uuid) {
+    public OfflinePlayer getPlayerFromUuid(UUID uuid) {
         try {
             return Bukkit.getOfflinePlayer(uuid);
 
@@ -112,7 +112,7 @@ public class Util {
         }
     }
 
-    public static UUID getUuidFromPlayer(String player) {
+    public UUID getUuidFromPlayer(String player) {
         try {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player);
             UUID uuid = null;
@@ -127,10 +127,20 @@ public class Util {
         }
     }
 
-    public static List<String> listAllPermissionFromPlayer(UUID uuid) {
-        List<String> list = null;
+    public List<String> listAllPermissionFromPlayer(UUID uuid) {
+        List<String> list = new ArrayList<>();
         try {
-            list = config.getStringList(uuid.toString());
+            Player player = Bukkit.getPlayer(uuid);
+            getLogger().info(uuid.toString());
+            for (PermissionAttachmentInfo attachmentInfo : player.getEffectivePermissions()) {
+                getLogger().info(attachmentInfo.getPermission());
+                String permission = attachmentInfo.getPermission();
+                if (attachmentInfo.getValue()) {
+                    if (permission.startsWith("admin.")) {
+                        list.add(attachmentInfo.getPermission());
+                    }
+                }
+            }
             return list;
         } catch (Exception e) {
             getLogger().info("listAllPermissionFromPlayer failed, because " + uuid + " caused following exception");
@@ -140,21 +150,28 @@ public class Util {
         return list;
     }
 
-    public static boolean check(CommandSender sender) {
+    public boolean check(CommandSender sender) {
         if (sender instanceof ConsoleCommandSender) {
             return true;
         }
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            sender.sendMessage("Player recognized");
-            sender.sendMessage(String.valueOf(player.hasPermission("admin.manage.playerPermission")));
-            sender.sendMessage(String.valueOf(player.isPermissionSet("admin.manage.playerPermission")));
-            sender.sendMessage(String.valueOf(player.hasPermission("lolwtf")));
-            sender.sendMessage(String.valueOf(player.isPermissionSet("lolwtf")));
             return player.hasPermission("admin.manage.playerPermission");
         }
         return false;
     }
+
+    public boolean isValidUUID(String input) {
+        // Regular expression pattern for Minecraft UUIDs
+        String uuidPattern = "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}";
+
+        // Create a Pattern object with the regex pattern
+        Pattern pattern = Pattern.compile(uuidPattern, Pattern.CASE_INSENSITIVE);
+
+        // Check if the input matches the UUID pattern
+        return pattern.matcher(input).matches();
+    }
+
 }
 //case "removepermission":
 //        if (existingList.contains(permission)) {
