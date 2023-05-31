@@ -81,8 +81,12 @@ public class Util {
 
                 Player player = Bukkit.getPlayer(uuid);
                 if (player.isOnline()) {
-                    PermissionAttachment attachment = player.addAttachment(plugin);
+                    PermissionAttachment attachment = attachmentManager.getAttachment(uuid);
+                    getLogger().info("REMOVED permission from attachment: " + attachment);
+                    getLogger().info("Player: " + permission);
+                    getLogger().info(attachment.getPermissions().toString());
                     attachment.unsetPermission(permission);
+
                     player.recalculatePermissions();
                     getLogger().info("Removed permission from player: " + permission);
                 } else {
@@ -131,9 +135,7 @@ public class Util {
         List<String> list = new ArrayList<>();
         try {
             Player player = Bukkit.getPlayer(uuid);
-            getLogger().info(uuid.toString());
             for (PermissionAttachmentInfo attachmentInfo : player.getEffectivePermissions()) {
-                getLogger().info(attachmentInfo.getPermission());
                 String permission = attachmentInfo.getPermission();
                 if (attachmentInfo.getValue()) {
                     if (permission.startsWith("admin.")) {
@@ -150,13 +152,13 @@ public class Util {
         return list;
     }
 
-    public boolean check(CommandSender sender) {
+    public boolean check(CommandSender sender, String permission) {
         if (sender instanceof ConsoleCommandSender) {
             return true;
         }
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            return player.hasPermission("admin.manage.playerPermission");
+            return player.hasPermission(permission);
         }
         return false;
     }

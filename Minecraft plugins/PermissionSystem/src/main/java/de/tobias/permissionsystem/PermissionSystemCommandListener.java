@@ -29,7 +29,7 @@ public class PermissionSystemCommandListener implements CommandExecutor, TabComp
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equals("permission")) {
-            if (!util.check(sender)) {
+            if (!util.check(sender, "admin.manage.playerpermission")) {
                 sender.sendMessage("§4[ERROR] Keine Berechtigung!");
                 return false;
             }
@@ -38,13 +38,14 @@ public class PermissionSystemCommandListener implements CommandExecutor, TabComp
             String action;
             UUID targetUuid;
             if (args.length != 3 && !args[0].equalsIgnoreCase("list")) {
-                sender.sendMessage("Verwendung: /permission <add | remove | check> <player> <permission>");
+                sender.sendMessage("Verwendung: /permission <add | remove | list> <player> <permission>");
                 return true;
             }
             action = args[0].toLowerCase();
             targetUuid = util.getUuidFromPlayer(args[1]);
             if (targetUuid == null) {
                 sender.sendMessage("§4[ERROR] Der Spieler " + args[1] + " war noch nicht auf dem Server!");
+                return true;
             }
             if (!action.equals("list")) {
                 permission = args[2];
@@ -102,7 +103,6 @@ public class PermissionSystemCommandListener implements CommandExecutor, TabComp
             }
             return true;
         }
-        sender.sendMessage("Verwendung: /permission <add | remove | check");
         return false;
     }
 
