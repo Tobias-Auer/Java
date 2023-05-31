@@ -5,6 +5,4 @@ api-version: 1.19
 commands:
   permission:
     description: Mangae the permisssions for all player
-    usage: /permission <add|remove|check> <player> <permission>
-    permissions: admin.manage.playerPermission#
-    permission-message: 'Permissions denied'
+    usage: /permission <add|remove|list> <player> <permission>
