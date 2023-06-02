@@ -7,10 +7,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -174,26 +176,49 @@ public class Util {
         return pattern.matcher(input).matches();
     }
 
+    public boolean addPermissionToServer(String permission, List<String> existingList, CommandSender sender) {
+        if (!existingList.contains(permission)) {
+            existingList.add(permission);
+            config.set("permissions", existingList);
+            try {
+                config.save(configFile);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            Permission permissionObj = new Permission(permission);
+            Bukkit.getServer().getPluginManager().addPermission(permissionObj);
+            sender.sendMessage("Berechtigung §b" + permission + " §rwurde dem Server hinzugefügt!");
+            return true;
+        }
+        sender.sendMessage("Berechtigung §4" + permission + " §rkonnte dem Server nicht hinzugefügt werden.");
+        return false;
+    }
+
+    public boolean removePermissionFromServer(String permission, List<String> existingList, CommandSender sender) {
+        if (existingList.contains(permission)) {
+            if (permission.equalsIgnoreCase("admin.manage.playerpermission") || permission.equalsIgnoreCase("admin.manage.serverpermission")) {
+                sender.sendMessage("Berechtigung §4" + permission + " §rkann nicht entfernt werden!");
+                return false;
+            }
+            existingList.remove(permission);
+            config.set("permissions", existingList);
+            try {
+                config.save(configFile);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            for (String uuidString : config.getKeys(false)) {
+                if (isValidUUID(uuidString)) {
+                    removePermissionFromPlayer(UUID.fromString(uuidString), permission);
+                }
+            }
+            sender.sendMessage("Berechtigung §4" + permission + " §rwurde gelöscht und von allen Spielern entfernt!");
+            return true;
+        } else {
+            sender.sendMessage("Berechtigung §4" + permission + " §rwurde nicht gefunden.");
+        }
+        return false;
+    }
+
 }
-//case "removepermission":
-//        if (existingList.contains(permission)) {
-//        existingList.remove(permission);
-//        config.set("permissions", existingList);
-//        for (String uuidString : config.getKeys(false)) {
-//        List<String> permissions = config.getStringList(uuidString);
-//        permissions.remove(permission);
-//        config.set(uuidString, permissions);
-//        }
-//        sender.sendMessage("Berechtigung §4" + permission + " §rwurde gelöscht und von allen Spielern entfernt!.");
-//        } else {
-//        sender.sendMessage("Berechtigung §4" + permission + " §rwurde nicht gefunden.");
-//        }
-//        break;
-
-
-//        if (!existingList.contains(permission)) {
-//            existingList.add(permission);
-//            config.set("permissions", existingList);
-//            Permission permissionObj = new Permission(permission);
-//            Bukkit.getServer().getPluginManager().addPermission(permissionObj);
-//       }

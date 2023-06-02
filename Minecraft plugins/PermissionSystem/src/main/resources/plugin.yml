@@ -4,5 +4,8 @@ main: de.tobias.permissionsystem.PermissionSystem
 api-version: 1.19
 commands:
   permission:
-    description: Mangae the permisssions for all player
+    description: Manage the permisssions for all player
     usage: /permission <add|remove|list> <player> <permission>
+  managepermission:
+    description: Manage the permissions for the server
+    usage: /managepermission <add|remove|list> <permission>
