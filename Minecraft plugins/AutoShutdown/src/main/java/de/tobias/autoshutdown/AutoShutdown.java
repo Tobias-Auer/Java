@@ -38,7 +38,7 @@ public final class AutoShutdown extends JavaPlugin {
 
             if (command.getName().equalsIgnoreCase("shutdown")) {
                 Bukkit.broadcastMessage(Objects.requireNonNull(config.getString("warnMessage")));
-                shutdownTimer(20*20);
+                shutdownTimer(20);
                 return true;
             }
             return false;
@@ -77,18 +77,20 @@ public final class AutoShutdown extends JavaPlugin {
                             welt.save();
                             getLogger().info("Welt erfolgreich gespeichert: " + welt.getName());
                         }
-                        try {
-                            ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", "shutdown -s");
-                            Process process = processBuilder.start();
-                            int exitCode = process.waitFor();
-                            System.out.println("Command executed with exit code: " + exitCode);
-                        } catch (IOException e) {
-                            System.err.println("Failed to execute command: " + e.getMessage());
-                        } catch (InterruptedException e) {
-                            System.err.println("Command execution interrupted: " + e.getMessage());
-                            Thread.currentThread().interrupt();
-                        }
 
+                        try {
+                            String command = "docker stop <container_name>";
+                            Process process = Runtime.getRuntime().exec(command);
+                            process.waitFor();
+                            int exitCode = process.exitValue();
+                            if (exitCode == 0) {
+                                getLogger().info("Docker container stopped successfully.");
+                            } else {
+                                getLogger().warning("Failed to stop Docker container.");
+                            }
+                        } catch (IOException | InterruptedException e) {
+                            getLogger().severe("An error occurred while stopping Docker container: " + e.getMessage());
+                        }
                     }
 
                 }
@@ -96,7 +98,6 @@ public final class AutoShutdown extends JavaPlugin {
         }, 0, 20); // Start sofort, wiederholen alle 1 Sekunde (20 Ticks)
     }
 
-    // TODO PERMISSON SYSTEM !!!!
     @Override
     public void onDisable() {
         // Timer abbrechen, wenn das Plugin deaktiviert wird
