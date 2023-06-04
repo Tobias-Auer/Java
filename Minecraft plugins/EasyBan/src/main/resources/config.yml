@@ -1,2 +1,19 @@
+# {0} = Reason
+# {1} = Start time
+# {2} = End time
+# {3} = Administrator
 ban-message: |
-  Du wurdest vom Servernetzwerk ausgeschlossen!
+  §4Du wurdest vom Servernetzwerk ausgeschlossen!
+  
+  
+  
+  §5Grund: §r{0}
+  
+  §6Zuständiger Administrator: §r{3}
+  
+  §dGebannt seit: §r{1}
+  §dGebannt bis: §r{2}
+  
+  
+  §2Entbannungsantrag: §fsurvival0.duckdns.io/unban
+

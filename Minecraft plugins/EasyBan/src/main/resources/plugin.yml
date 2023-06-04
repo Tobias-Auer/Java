@@ -4,17 +4,6 @@ main: de.tobias.easyban.EasyBan
 api-version: 1.19
 commands:
   ban:
-    description: |
-      ban players
-      Reasons:
-        Hacking
-        Griefing
-        Spam
-        Advertisement
-        Insult
-        Disrespect
-        Money trading
-        Misinformation
-        Other
+    description: ban players
     tab-completer: de.tobias.easyban.EasyBanCommandListener
     usage: ban <player> <reason> <hours> <days> <months>
