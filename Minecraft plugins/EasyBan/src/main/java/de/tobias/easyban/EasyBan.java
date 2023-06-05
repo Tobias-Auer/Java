@@ -23,7 +23,9 @@ public final class EasyBan extends JavaPlugin {
         pluginManager.registerEvents(listener, this);
 
         getCommand("ban").setExecutor(new EasyBanCommandListener(config, configFile, this));
+        getCommand("unban").setExecutor(new EasyBanCommandListener(config, configFile, this));
         getCommand("ban").setTabCompleter(new EasyBanCommandListener(config, configFile, this));
+        getCommand("unban").setTabCompleter(new EasyBanCommandListener(config, configFile, this));
 
 
     }

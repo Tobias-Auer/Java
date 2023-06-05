@@ -10,6 +10,7 @@ import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -42,40 +43,33 @@ public class EasyBanListener implements Listener {
             message = message.replace("{0}", config.getStringList(uuid).get(1));
             message = message.replace("{1}", config.getStringList(uuid).get(2));
 
-            String dateString = config.getStringList(uuid).get(3);// ban time
+            String bannedUntilTimeString = config.getStringList(uuid).get(3);// ban time
 
 
-            Date now = new Date();
+            Date nowTimeObject = new Date();
 
             SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
             format.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
-            String date = format.format(now);
+            String nowTimeString = format.format(nowTimeObject);
 
-            System.out.println("Date and time in Berlin: " + date);
+            getLogger().info("Date and time in Berlin: " + nowTimeString);
+            getLogger().info("Date until banned: "  + bannedUntilTimeString);
 
 
-            message = message.replace("{2}", dateString);
+            message = message.replace("{2}", bannedUntilTimeString);
             UUID adminUuid = UUID.fromString(config.getStringList(uuid).get(0));
             message = message.replace("{3}", Bukkit.getOfflinePlayer(adminUuid).getName());
 
             try {
-                Date futureTime = format.parse(dateString);
-                Date nowTime = format.parse(nowString);
-                getLogger().info(nowTime.toString());
-                getLogger().info(futureTime.toString());
-                if (nowTime.before(futureTime)) {
-                    System.out.println("Die aktuelle Zeit liegt vor der zukünftigen Zeit.");
-                } else if (nowTime.after(futureTime)) {
-                    System.out.println("Die aktuelle Zeit liegt nach der zukünftigen Zeit.");
-                } else {
-                    System.out.println("Die aktuelle Zeit und die zukünftige Zeit sind gleich.");
-                }
-                if (futureTime.after(nowTime)) {
+                Date bannedUntilTimeObject = format.parse(bannedUntilTimeString);
+                if (nowTimeObject.before(bannedUntilTimeObject)) {
                     event.getPlayer().kickPlayer(message);
-                }else {
+                } else if (nowTimeObject.after(bannedUntilTimeObject)) {
                     config.set(uuid, null);
+                    config.save(configFile);
+                    event.getPlayer().sendTitle(config.getString("welcomeback-message1"), config.getString("welcomeback-message2"), 10, 250, 70);
                 }
-            } catch (ParseException e) {
+            } catch (ParseException | IOException e) {
                 throw new RuntimeException(e);
             }
 
