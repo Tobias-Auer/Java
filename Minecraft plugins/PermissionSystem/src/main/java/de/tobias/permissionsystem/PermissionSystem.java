@@ -31,15 +31,8 @@ public final class PermissionSystem extends JavaPlugin implements Listener {
         PluginManager pluginManager = Bukkit.getPluginManager();
         PermissonSystemListener listener = new PermissonSystemListener(config, configFile, attachmentManager, this);
         pluginManager.registerEvents(listener, this);
-        getCommand("permission").setExecutor(new PermissionSystemCommandListener(config, configFile, attachmentManager, this));
-        getCommand("managepermission").setExecutor(new PermissionSystemCommandListener(config, configFile, attachmentManager, this));
+        getCommand("perm").setExecutor(new PermissionSystemCommandListener(config, configFile, attachmentManager, this));
 
-
-        for (String permission : config.getStringList("permissions")) {
-            Permission permissionObj = new Permission(permission);
-            Bukkit.getServer().getPluginManager().addPermission(permissionObj);
-            getLogger().info("Permission added: " + permission);
-        }
     }
 
 

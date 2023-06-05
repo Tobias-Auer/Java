@@ -46,13 +46,12 @@ public class EasyBanListener implements Listener {
 
 
             Date now = new Date();
+
             SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-
-// Use Madrid's time zone to format the date in
             format.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
+            String date = format.format(now);
 
-            System.out.println("Date and time in Berlin: " + format.format(now));
-            String nowString = format.format(now);
+            System.out.println("Date and time in Berlin: " + date);
 
 
             message = message.replace("{2}", dateString);

@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +28,7 @@ public class PermissionSystemCommandListener implements CommandExecutor, TabComp
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (command.getName().equals("permission")) {
+        if (command.getName().equals("perm")) {
             if (!util.check(sender, "admin.manage.playerpermission")) {
                 sender.sendMessage("§4[ERROR] Keine Berechtigung!");
                 return true;
@@ -39,7 +38,7 @@ public class PermissionSystemCommandListener implements CommandExecutor, TabComp
             String action;
             UUID targetUuid;
             if (args.length != 3 && !args[0].equalsIgnoreCase("list")) {
-                sender.sendMessage("Verwendung: /permission <add | remove | list> <player> <permission>");
+                sender.sendMessage("Verwendung: /perm <add | remove | list> <player> <permission>");
                 return true;
             }
             action = args[0].toLowerCase();
@@ -88,7 +87,6 @@ public class PermissionSystemCommandListener implements CommandExecutor, TabComp
                         sender.sendMessage("§4=====================");
                     }
                     break;
-
                 default:
                     sender.sendMessage("Verwendung: /permission <add | remove | check> <player> <permission>");
                     break;
@@ -100,57 +98,14 @@ public class PermissionSystemCommandListener implements CommandExecutor, TabComp
             }
             return true;
         }
-        if (command.getName().equals("managepermission")) {
-            if (!util.check(sender, "admin.manage.serverpermission")) {
-                sender.sendMessage("§4[ERROR] Keine Berechtigung!");
-                return true;
-            }
-            if (args.length != 2 && !args[0].equalsIgnoreCase("list")) {
-                sender.sendMessage("Verwendung: /managePermission <add|remove|list> <permission>");
-                return true;
-            }
-            String action = args[0];
-            String permission = null;
-            if (!action.equalsIgnoreCase("list")) {
-                permission = args[1];
-            }
-            List<String> existingList = config.getStringList("permissions");
-            switch (action.toLowerCase()) {
-                case "add":
-                    if (util.addPermissionToServer(permission, existingList, sender)) {
-                        break;
-                    }
-                    sender.sendMessage("§4[ERROR] Es ist ein Fehler aufgetreten");
-                    break;
-                case "remove":
-                    if (util.removePermissionFromServer(permission, existingList, sender)) {
-                        break;
-                    }
-                    sender.sendMessage("§4[ERROR] Es ist ein Fehler aufgetreten");
-                    break;
-                case "list":
-                    sender.sendMessage("§4=====================");
-                    for (String key : existingList) {
-                        if (key.startsWith("admin.manage.")) {
-                            sender.sendMessage("§5" + key);
-                        } else {
-                            sender.sendMessage(key);
-                        }
-                    }
-                    sender.sendMessage("§4=====================");
-                    break;
-                default:
-                    sender.sendMessage("Verwendung: /managePermission <add|remove|list> <permission>");
-                    return true;
-            }
-        }
+
         return true;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
-        if (command.getName().equals("permission")) {
+        if (command.getName().equals("perm")) {
             if (sender instanceof Player) {
                 Player player = (Player) sender;
                 if (!player.hasPermission("admin.manage.playerpermission")) {
@@ -181,23 +136,6 @@ public class PermissionSystemCommandListener implements CommandExecutor, TabComp
                 } else if (args[0].equals("remove")) {
                     completions.addAll(playerPerms);
                 }
-            }
-        }
-        if (command.getName().equals("managepermission")) {
-            if (sender instanceof Player) {
-                Player player = (Player) sender;
-                if (!player.hasPermission("admin.manage.serverpermission")) {
-                    return new ArrayList<>(); // Return an empty list to prevent autocompletion
-                }
-            }
-            if (args.length == 1) {
-                completions.add("list");
-                completions.add("add");
-                completions.add("remove");
-            }
-            if (args.length == 2 && args[0].equals("remove")) {
-                completions.addAll(config.getStringList("permissions"));
-
             }
         }
 

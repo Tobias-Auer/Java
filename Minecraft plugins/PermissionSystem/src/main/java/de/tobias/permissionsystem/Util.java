@@ -196,7 +196,7 @@ public class Util {
 
     public boolean removePermissionFromServer(String permission, List<String> existingList, CommandSender sender) {
         if (existingList.contains(permission)) {
-            if (permission.equalsIgnoreCase("admin.manage.playerpermission") || permission.equalsIgnoreCase("admin.manage.serverpermission")) {
+            if (permission.equalsIgnoreCase("admin.manage.playerpermission")) {
                 sender.sendMessage("Berechtigung §4" + permission + " §rkann nicht entfernt werden!");
                 return false;
             }
