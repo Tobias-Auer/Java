@@ -66,7 +66,6 @@ public class EasyBanCommandListener implements TabCompleter, CommandExecutor {
                 completions.add("months");
             }
         } else if (command.getName().equals("unban")) {
-            getLogger().info("Unban autocomplete started...");
             getLogger().info(command.getName());
             if (sender instanceof Player) {
                 Player player = (Player) sender;
@@ -74,19 +73,12 @@ public class EasyBanCommandListener implements TabCompleter, CommandExecutor {
                     return new ArrayList<>();
                 }
             }
-            getLogger().info("Perm check passed");
             if (args.length == 1) {
-                getLogger().info("Args passed");
                 Set<String> playerUuids = config.getKeys(false);
-                getLogger().info("get configs");
                 for (String playerUuid : playerUuids) {
-                    getLogger().info("outher loop");
                     if (Util.isValidUUID(playerUuid)) {
-                        getLogger().info("valid uuid");
                         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(playerUuid));
-                        getLogger().info("got offline player");
                         completions.add(offlinePlayer.getName());
-                        getLogger().info("added autocomplete");
                     }
                 }
 
@@ -154,9 +146,9 @@ public class EasyBanCommandListener implements TabCompleter, CommandExecutor {
                     message = message.replace("{2}", future);
                     message = message.replace("{3}", senderPlayer.getName());
                     player.kickPlayer(message);
-                    getLogger().info("§2[Info] Player + " + player.getName() + "banned");
+                    sender.sendMessage("§2[Info] Player " + player.getName() + " banned");
                 } else {
-                    getLogger().info("§2[Info] Player + " + offlinePlayer.getName() + "banned");
+                    sender.sendMessage("§2[Info] Player " + offlinePlayer.getName() + " banned");
                 }
 
                 return true;
@@ -172,10 +164,9 @@ public class EasyBanCommandListener implements TabCompleter, CommandExecutor {
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[0]);
                 String uuid = offlinePlayer.getUniqueId().toString();
                 if (config.getString(uuid) != null) {
-                    ArrayList<String> data = (ArrayList<String>) config.getStringList(uuid);
-                    data.set(3, data.get(2));
-                    config.set(uuid, data);
+                    config.set(uuid, null);
                     sender.sendMessage("§2 Unbanned player: " + offlinePlayer.getName());
+                    config.save(configFile);
                     return true;
                 }
                 sender.sendMessage("§4[ERROR]Player not found");
