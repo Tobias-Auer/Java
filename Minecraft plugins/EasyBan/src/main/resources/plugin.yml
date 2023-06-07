@@ -7,10 +7,12 @@ commands:
     description: ban players
     tab-completer: de.tobias.easyban.EasyBanCommandListener
     usage: ban <player> <reason> <minutes> <hours> <days> <months>
+    permission: admin.ban
   unban:
     description: unban players
     tab-completer: de.tobias.easyban.EasyBanCommandListener
     usage: unban <player>
+    permission: admin.ban
 
 
 permissions:

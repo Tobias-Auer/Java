@@ -1,0 +1,16 @@
+name: EasyShowMessage
+version: '${project.version}'
+main: de.tobias.easyshowmessage.EasyShowMessage
+api-version: 1.19
+commands:
+  show:
+    description: send message to all player
+    tab-completer: de.tobias.EasyShowMessageCommandListener
+    usage: show
+#    permission: admin.ban
+
+
+permissions:
+  admin.show:
+    default: op
+    description: Permission to show messages to other players

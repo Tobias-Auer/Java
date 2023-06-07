@@ -1,0 +1,15 @@
+#_kick = kick player
+rule:
+  message: |
+    Willkommen auf meinem Server.
+    
+    Regeln NICHT akzeptieren: [hier, _kick]!
+    
+    [Regeln, https://discord.gg/vJYNnsQwf8/]
+    
+    Schaue auch auf meinem Discord Server und meiner Website vorbei!
+    [Discord, https://discord.gg/vJYNnsQwf8/] [Website, http://survival0.duckdns.org/]
+    
+    Viel Spaß beim spielen!
+
+  seen: []
