@@ -7,7 +7,8 @@ commands:
     description: send message to all player
     tab-completer: de.tobias.EasyShowMessageCommandListener
     usage: show
-#    permission: admin.ban
+  leave:
+    description: leave server
 
 
 permissions:

@@ -1,5 +1,6 @@
 package de.tobias.easyshowmessage;
 
+import de.tobias.easyshowmessage.listerner.JoinListener;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.PluginManager;
@@ -18,11 +19,12 @@ public final class EasyShowMessage extends JavaPlugin {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
 
         PluginManager pluginManager = Bukkit.getPluginManager();
-//        EasyBanListener listener = new EasyBanListener(config, configFile, this);
-//        pluginManager.registerEvents(listener, this);
+        pluginManager.registerEvents(new JoinListener(config, configFile), this);
 
         getCommand("show").setExecutor(new EasyShowMessageCommandListener(config, configFile, this));
+        getCommand("leave").setExecutor(new EasyShowMessageCommandListener(config, configFile, this));
         getCommand("show").setTabCompleter(new EasyShowMessageCommandListener(config, configFile, this));
+
 
     }
 
