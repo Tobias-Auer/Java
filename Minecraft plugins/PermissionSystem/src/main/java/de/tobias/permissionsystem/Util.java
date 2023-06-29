@@ -23,42 +23,37 @@ import static org.bukkit.Bukkit.getLogger;
 public class Util {
     private static YamlConfiguration config = null;
     private static File configFile = null;
-    private static PermissionSystem plugin = null;
     private static AttachmentManager attachmentManager = null;
 
     public Util(YamlConfiguration config, File configFile, PermissionSystem plugin, AttachmentManager attachmentManager) {
         Util.config = config;
         Util.configFile = configFile;
-        Util.plugin = plugin;
         Util.attachmentManager = attachmentManager;
     }
 
-    public boolean addPermissionToPlayer(UUID uuid, String permission, List<String> existingList) {
+    public boolean addPermissionToPlayer(UUID uuid, String permission) {
         try {
             List<String> playerPerms = config.getStringList(uuid.toString());
             if (playerPerms.contains(permission)) {
                 throw new IllegalStateException("Permission already assigned!");
             }
-            if (existingList.contains(permission)) {
-                playerPerms.add(permission);
-                config.set(uuid.toString(), playerPerms);
-                config.save(configFile);
-                getLogger().info("Added permission to file: " + permission);
-                getLogger().info("UUID: " + uuid);
-                getLogger().info("Player: " + Bukkit.getOfflinePlayer(uuid).getName());
-                Player player = Bukkit.getPlayer(uuid);
-                if (player != null) {
-                    PermissionAttachment attachment = attachmentManager.getAttachment(uuid);
-                    attachment.setPermission(permission, true);
+            playerPerms.add(permission);
+            config.set(uuid.toString(), playerPerms);
+            config.save(configFile);
+            getLogger().info("Added permission to file: " + permission);
+            getLogger().info("UUID: " + uuid);
+            getLogger().info("Player: " + Bukkit.getOfflinePlayer(uuid).getName());
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null) {
+                PermissionAttachment attachment = attachmentManager.getAttachment(uuid);
+                attachment.setPermission(permission, true);
 
-                    player.recalculatePermissions();
-                    getLogger().info("Added permission to player: " + permission);
-                } else {
-                    getLogger().info("Player is offline. Permission will be applied as soon as he joins the server.");
-                }
+                player.recalculatePermissions();
+                getLogger().info("Added permission to player: " + permission);
             } else {
-                throw new IllegalStateException("Permission not found!");
+                getLogger().info("Player is offline. Permission will be applied as soon as he joins the server.");
             }
+
         } catch (Exception e) {
             getLogger().info("Failed to add permission: " + permission);
             getLogger().info("UUID: " + uuid);
@@ -174,51 +169,6 @@ public class Util {
 
         // Check if the input matches the UUID pattern
         return pattern.matcher(input).matches();
-    }
-
-    public boolean addPermissionToServer(String permission, List<String> existingList, CommandSender sender) {
-        if (!existingList.contains(permission)) {
-            existingList.add(permission);
-            config.set("permissions", existingList);
-            try {
-                config.save(configFile);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            Permission permissionObj = new Permission(permission);
-            Bukkit.getServer().getPluginManager().addPermission(permissionObj);
-            sender.sendMessage("Berechtigung §b" + permission + " §rwurde dem Server hinzugefügt!");
-            return true;
-        }
-        sender.sendMessage("Berechtigung §4" + permission + " §rkonnte dem Server nicht hinzugefügt werden.");
-        return false;
-    }
-
-    public boolean removePermissionFromServer(String permission, List<String> existingList, CommandSender sender) {
-        if (existingList.contains(permission)) {
-            if (permission.equalsIgnoreCase("admin.manage.playerpermission")) {
-                sender.sendMessage("Berechtigung §4" + permission + " §rkann nicht entfernt werden!");
-                return false;
-            }
-            existingList.remove(permission);
-            config.set("permissions", existingList);
-            try {
-                config.save(configFile);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            for (String uuidString : config.getKeys(false)) {
-                if (isValidUUID(uuidString)) {
-                    removePermissionFromPlayer(UUID.fromString(uuidString), permission);
-                }
-            }
-            sender.sendMessage("Berechtigung §4" + permission + " §rwurde gelöscht und von allen Spielern entfernt!");
-            return true;
-        } else {
-            sender.sendMessage("Berechtigung §4" + permission + " §rwurde nicht gefunden.");
-        }
-        return false;
     }
 
 }

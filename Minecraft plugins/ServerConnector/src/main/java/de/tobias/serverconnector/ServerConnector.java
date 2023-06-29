@@ -18,11 +18,11 @@ public final class ServerConnector extends JavaPlugin {
         int minute = calendar.get(Calendar.MINUTE);
         int second = calendar.get(Calendar.SECOND);
         getLogger().info("Aktuelle Zeit in Deutschland: " + hour + ":" + minute + ":" + second);
-
-        scheduleShutdownBroadcast();
-        scheduleShutdown();
         connector = new SQLiteConnector();
         connector.connect("./databse_webserver/data.db");
+        scheduleShutdownBroadcast();
+        scheduleShutdown();
+
         getCommand("shutdown").setExecutor(new CommandListener(connector));
         connector.readData();
     }
@@ -35,8 +35,8 @@ public final class ServerConnector extends JavaPlugin {
     private void scheduleShutdownBroadcast() {
         getLogger().info("sheduleShutdown!");
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
-        calendar.set(Calendar.HOUR_OF_DAY, 18);
-        calendar.set(Calendar.MINUTE, 40);
+        calendar.set(Calendar.HOUR_OF_DAY, 21);
+        calendar.set(Calendar.MINUTE, 55);
         calendar.set(Calendar.SECOND, 0);
 
         Timer timer = new Timer();
@@ -46,8 +46,8 @@ public final class ServerConnector extends JavaPlugin {
                 // Broadcast, dass der Server in 5 Minuten heruntergefahren wird
                 Bukkit.broadcastMessage("Der Server wird in 5 Minuten heruntergefahren!");
                 Calendar calendar2 = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
-                calendar2.set(Calendar.HOUR_OF_DAY, 18);
-                calendar2.set(Calendar.MINUTE, 41);
+                calendar2.set(Calendar.HOUR_OF_DAY, 22);
+                calendar2.set(Calendar.MINUTE, 0);
                 calendar2.set(Calendar.SECOND, 0);
                 // Starte den Countdown-Timer für 5 Minuten
                 Date currentTime = new Date();
@@ -62,8 +62,8 @@ public final class ServerConnector extends JavaPlugin {
 
     private void scheduleShutdown() {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
-        calendar.set(Calendar.HOUR_OF_DAY, 18);
-        calendar.set(Calendar.MINUTE, 41);
+        calendar.set(Calendar.HOUR_OF_DAY, 22);
+        calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
 
         Timer timer = new Timer();

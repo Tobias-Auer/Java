@@ -51,14 +51,9 @@ public class PermissionSystemCommandListener implements CommandExecutor, TabComp
                 permission = args[2];
             }
 
-            List<String> existingList = config.getStringList("permissions");
             switch (action) {
                 case "add":
-                    if (!existingList.contains(permission)) {
-                        sender.sendMessage("§6[WARNING] §4Berechtigung §b" + permission + " §4konnte nicht hinzugefügt werden, da diese nicht existiert!");
-                        break;
-                    }
-                    if (util.addPermissionToPlayer(targetUuid, permission, existingList)) {
+                    if (util.addPermissionToPlayer(targetUuid, permission)) {
                         sender.sendMessage("§7[INFO] §rBerechtigung §b" + permission + " §rwurde hinzugefügt.");
                         break;
                     }

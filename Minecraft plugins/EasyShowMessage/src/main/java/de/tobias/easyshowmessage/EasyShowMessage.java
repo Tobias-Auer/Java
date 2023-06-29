@@ -20,10 +20,7 @@ public final class EasyShowMessage extends JavaPlugin {
 
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new JoinListener(config, configFile), this);
-
-        getCommand("show").setExecutor(new EasyShowMessageCommandListener(config, configFile, this));
         getCommand("leave").setExecutor(new EasyShowMessageCommandListener(config, configFile, this));
-        getCommand("show").setTabCompleter(new EasyShowMessageCommandListener(config, configFile, this));
 
 
     }

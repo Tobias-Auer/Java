@@ -6,7 +6,6 @@ commands:
   perm:
     description: Manage the permisssions for all player
     usage: /perm <add|remove|list> <player> <permission>
-    permission: admin.manage.playerpermission
 
 permissions:
   admin.manage.playerpermission:

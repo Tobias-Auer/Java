@@ -6,3 +6,7 @@ commands:
   shutdown:
     description: Schaltet den Server aus.
     usage: /shutdown
+permissions:
+  admin.action.shutdown:
+    default: op
+    description: Permission to shutdown the server
