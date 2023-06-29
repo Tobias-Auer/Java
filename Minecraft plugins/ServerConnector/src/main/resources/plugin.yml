@@ -1,0 +1,8 @@
+name: ServerConnector
+version: '${project.version}'
+main: de.tobias.serverconnector.ServerConnector
+api-version: '1.20'
+commands:
+  shutdown:
+    description: Schaltet den Server aus.
+    usage: /shutdown
