@@ -1,7 +1,9 @@
 package de.tobias.serverconnector;
 
 import de.tobias.serverconnector.listener.CommandListener;
+import de.tobias.serverconnector.listener.JoinListener;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
@@ -24,6 +26,9 @@ public final class ServerConnector extends JavaPlugin {
         scheduleShutdown();
 
         getCommand("shutdown").setExecutor(new CommandListener(connector));
+        PluginManager pluginManager = Bukkit.getPluginManager();
+        pluginManager.registerEvents(new JoinListener(connector), this);
+
         connector.readData();
     }
 
