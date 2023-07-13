@@ -13,13 +13,6 @@ public final class ServerConnector extends JavaPlugin {
     private SQLiteConnector connector;
     @Override
     public void onEnable() {
-
-
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
-        int second = calendar.get(Calendar.SECOND);
-        getLogger().info("Aktuelle Zeit in Deutschland: " + hour + ":" + minute + ":" + second);
         connector = new SQLiteConnector();
         connector.connect("./databse_webserver/data.db");
         scheduleShutdownBroadcast();
@@ -38,32 +31,37 @@ public final class ServerConnector extends JavaPlugin {
     }
 
     private void scheduleShutdownBroadcast() {
-        getLogger().info("sheduleShutdown!");
+        getLogger().info("scheduleShutdown!");
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         calendar.set(Calendar.HOUR_OF_DAY, 21);
         calendar.set(Calendar.MINUTE, 55);
         calendar.set(Calendar.SECOND, 0);
 
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                // Broadcast, dass der Server in 5 Minuten heruntergefahren wird
-                Bukkit.broadcastMessage("Der Server wird in 5 Minuten heruntergefahren!");
-                Calendar calendar2 = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
-                calendar2.set(Calendar.HOUR_OF_DAY, 22);
-                calendar2.set(Calendar.MINUTE, 0);
-                calendar2.set(Calendar.SECOND, 0);
-                // Starte den Countdown-Timer für 5 Minuten
-                Date currentTime = new Date();
-                Date scheduledTime = calendar2.getTime();
+        // Überprüfen, ob die aktuelle Uhrzeit vor 21:55 Uhr liegt
+        Calendar currentTime = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
+        if (currentTime.before(calendar)) {
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    // Broadcast, dass der Server in 5 Minuten heruntergefahren wird
+                    Bukkit.broadcastMessage("Der Server wird in 5 Minuten heruntergefahren!");
+                    Calendar calendar2 = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
+                    calendar2.set(Calendar.HOUR_OF_DAY, 22);
+                    calendar2.set(Calendar.MINUTE, 0);
+                    calendar2.set(Calendar.SECOND, 0);
+                    // Starte den Countdown-Timer für 5 Minuten
+                    Date currentTime = new Date();
+                    Date scheduledTime = calendar2.getTime();
 
-                long timeDifference = (scheduledTime.getTime() - currentTime.getTime()) / 1000;
-                System.out.println("Seconds until execution: " + timeDifference);
-                startCountdown((int) timeDifference);
-            }
-        }, calendar.getTime());
+                    long timeDifference = (scheduledTime.getTime() - currentTime.getTime()) / 1000;
+                    System.out.println("Seconds until execution: " + timeDifference);
+                    startCountdown((int) timeDifference);
+                }
+            }, calendar.getTime());
+        }
     }
+
 
     private void scheduleShutdown() {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
@@ -71,17 +69,22 @@ public final class ServerConnector extends JavaPlugin {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
 
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                // Broadcast und Ausführung von shutdown()
-                Bukkit.broadcastMessage("Der Server wird jetzt heruntergefahren!");
-                connector.insertData("shutdown");
-                Bukkit.shutdown();
-            }
-        }, calendar.getTime());
+        // Überprüfen, ob die aktuelle Uhrzeit vor 22:00 Uhr liegt
+        Calendar currentTime = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
+        if (currentTime.before(calendar)) {
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    // Broadcast und Ausführung von shutdown()
+                    Bukkit.broadcastMessage("Der Server wird jetzt heruntergefahren!");
+                    connector.insertData("shutdown");
+                    Bukkit.shutdown();
+                }
+            }, calendar.getTime());
+        }
     }
+
 
     private void startCountdown(int seconds) {
         Timer timer = new Timer();
