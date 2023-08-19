@@ -4,6 +4,7 @@ import de.tobias.serverconnector.SQLiteConnector;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import static org.bukkit.Bukkit.getLogger;
 
@@ -13,19 +14,26 @@ public class JoinListener implements Listener {
     private boolean alreadyActivated;
     private final SQLiteConnector connector;
 
-    public JoinListener(SQLiteConnector connector) {
-        this.connector = connector;
-        this.alreadyActivated = false;
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        connector.insertData(event.getPlayer().getDisplayName()+"~online", "meta", "status");
+        if (!alreadyActivated) {
+            connector.insertData("backup", "meta", "doAction");
+            getLogger().info("Backup enabled");
+            alreadyActivated = true;
+        }
+//        else {
+//            alreadyActivated = false;
+//        }
     }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent event) {
-        if (!alreadyActivated) {
-            connector.insertData("backup");
-            getLogger().info("Backup enabled");
-        }
-        else {
-            alreadyActivated = false;
-        }
+    public void onQuit(PlayerQuitEvent event) {
+        connector.insertData(event.getPlayer().getDisplayName()+"~offline", "meta", "status");
+    }
+
+    public JoinListener(SQLiteConnector connector) {
+        this.connector = connector;
+        this.alreadyActivated = false;
     }
 }

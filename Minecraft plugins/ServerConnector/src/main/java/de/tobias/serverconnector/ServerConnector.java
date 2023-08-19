@@ -13,10 +13,11 @@ public final class ServerConnector extends JavaPlugin {
     private SQLiteConnector connector;
     @Override
     public void onEnable() {
-        connector = new SQLiteConnector();
-        connector.connect("./databse_webserver/data.db");
         scheduleShutdownBroadcast();
         scheduleShutdown();
+        connector = new SQLiteConnector();
+        connector.connect("./databse_webserver/data.db");
+
 
         getCommand("shutdown").setExecutor(new CommandListener(connector));
         PluginManager pluginManager = Bukkit.getPluginManager();
@@ -78,7 +79,7 @@ public final class ServerConnector extends JavaPlugin {
                 public void run() {
                     // Broadcast und Ausführung von shutdown()
                     Bukkit.broadcastMessage("Der Server wird jetzt heruntergefahren!");
-                    connector.insertData("shutdown");
+                    connector.insertData("shutdown", "meta", "doAction");
                     Bukkit.shutdown();
                 }
             }, calendar.getTime());

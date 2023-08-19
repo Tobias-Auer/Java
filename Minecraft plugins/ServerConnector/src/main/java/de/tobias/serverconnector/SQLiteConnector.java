@@ -1,14 +1,16 @@
 package de.tobias.serverconnector;
 
+import org.bukkit.plugin.java.JavaPlugin;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.util.logging.Level;
 import static org.bukkit.Bukkit.getLogger;
-
 public class SQLiteConnector {
+
     private Connection connection;
 
     public void connect(String databasePath) {
@@ -44,8 +46,8 @@ public class SQLiteConnector {
         }
     }
 
-    public void insertData(String data) {
-        String query = "INSERT INTO meta (doAction) VALUES (?)";
+    public void insertData(String data, String table, String column) {
+        String query = "INSERT INTO " + table + " ("+column+") VALUES (?)";
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, data);
@@ -55,8 +57,8 @@ public class SQLiteConnector {
             e.printStackTrace();
         }
     }
-    public void removeData(String data) {
-        String query = "DELETE FROM meta WHERE doAction = ?";
+    public void removeData(String data, String table, String column) {
+        String query = "DELETE FROM " + table + " WHERE " + column + " = ?";
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, data);
@@ -66,7 +68,6 @@ public class SQLiteConnector {
             e.printStackTrace();
         }
     }
-
 
 
     public void readData() {
@@ -76,10 +77,8 @@ public class SQLiteConnector {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 String action = resultSet.getString("doAction");
-                System.out.println("doAction: " + action);
+                getLogger().info("doAction: " + action);
             }
-            resultSet.close();
-            statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }

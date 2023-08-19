@@ -37,7 +37,7 @@ public class CommandListener implements CommandExecutor {
                         if (!eventCancel) {
                             // Broadcast und Ausführung von shutdown()
                             Bukkit.broadcastMessage("Der Server wird jetzt heruntergefahren!");
-                            connector.insertData("shutdown");
+                            connector.insertData("shutdown", "meta", "doAction");
                             Bukkit.shutdown();
                         }
                     }
@@ -66,7 +66,7 @@ public class CommandListener implements CommandExecutor {
             else {
                 getLogger().info("KILL SHUTDOWN");
                 eventCancel = true;
-                connector.removeData("shutdown");
+                connector.removeData("shutdown", "meta", "doAction");
                 Bukkit.broadcastMessage("Servershutdown wurde von " + sender.getName() + " abgebrochen!");
             }
             sender.sendMessage("Done!");
