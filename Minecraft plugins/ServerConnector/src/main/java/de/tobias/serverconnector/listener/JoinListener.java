@@ -16,7 +16,7 @@ public class JoinListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        connector.insertData(event.getPlayer().getDisplayName()+"~online", "meta", "status");
+        connector.insertData(event.getPlayer().getUniqueId()+"~online", "status", "status");
         if (!alreadyActivated) {
             connector.insertData("backup", "meta", "doAction");
             getLogger().info("Backup enabled");
@@ -29,7 +29,7 @@ public class JoinListener implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        connector.insertData(event.getPlayer().getDisplayName()+"~offline", "meta", "status");
+        connector.insertData(event.getPlayer().getUniqueId()+"~offline", "status", "status");
     }
 
     public JoinListener(SQLiteConnector connector) {

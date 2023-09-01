@@ -16,7 +16,7 @@ public final class ServerConnector extends JavaPlugin {
         scheduleShutdownBroadcast();
         scheduleShutdown();
         connector = new SQLiteConnector();
-        connector.connect("./databse_webserver/data.db");
+        connector.connect("./database_webserver/data.db");
 
 
         getCommand("shutdown").setExecutor(new CommandListener(connector));
