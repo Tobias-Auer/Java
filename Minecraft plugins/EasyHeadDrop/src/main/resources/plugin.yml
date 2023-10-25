@@ -1,0 +1,6 @@
+name: EasyHeadDrop
+version: '${project.version}'
+main: de.tobias.easyheaddrop.EasyHeadDrop
+api-version: '1.20'
+authors: [Tobias Auer]
+website: www.github.com/Tobias-Auer
