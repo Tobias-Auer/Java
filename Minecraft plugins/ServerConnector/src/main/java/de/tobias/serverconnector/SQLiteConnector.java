@@ -83,4 +83,24 @@ public class SQLiteConnector {
             e.printStackTrace();
         }
     }
+
+    public String readPrefixData(String uuid) {
+        uuid = uuid.replace("-", "");
+        String query = "SELECT prefix FROM main WHERE uuid = ?";
+        getLogger().info("readPrefixData: " + uuid);
+        try {
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, uuid);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                String prefix = resultSet.getString("prefix");
+                getLogger().info("Prefix: " + prefix);
+                return prefix;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ""; // Return "" if no data is found
+    }
+
 }

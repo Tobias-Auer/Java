@@ -11,17 +11,19 @@ import java.util.*;
 public final class ServerConnector extends JavaPlugin {
 
     private SQLiteConnector connector;
+    private SQLiteConnector prefixConnector;
     @Override
     public void onEnable() {
         scheduleShutdownBroadcast();
         scheduleShutdown();
         connector = new SQLiteConnector();
+        prefixConnector = new SQLiteConnector();
         connector.connect("./database_webserver/data.db");
-
+        prefixConnector.connect("./database_webserver/prefixes.db");
 
         getCommand("shutdown").setExecutor(new CommandListener(connector));
         PluginManager pluginManager = Bukkit.getPluginManager();
-        pluginManager.registerEvents(new JoinListener(connector), this);
+        pluginManager.registerEvents(new JoinListener(connector, prefixConnector), this);
 
         connector.readData();
     }
