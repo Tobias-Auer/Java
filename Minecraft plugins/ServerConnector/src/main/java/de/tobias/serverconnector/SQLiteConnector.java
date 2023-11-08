@@ -7,6 +7,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import static org.bukkit.Bukkit.getLogger;
 public class SQLiteConnector {
@@ -70,6 +72,8 @@ public class SQLiteConnector {
     }
 
 
+
+
     public void readData() {
         String query = "SELECT * FROM meta";
         try {
@@ -83,6 +87,29 @@ public class SQLiteConnector {
             e.printStackTrace();
         }
     }
+
+    public List<String> readLoginData() {
+        String query = "SELECT * FROM login";
+        List<String> loginDataList = new ArrayList<>();
+
+        try {
+            PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                String uuidString = resultSet.getString("uuid");
+                String uuid = uuidString.substring(0, 8) + "-" + uuidString.substring(8, 12) + "-" + uuidString.substring(12, 16) + "-" + uuidString.substring(16, 20) + "-" + uuidString.substring(20);
+                String secret_pin = resultSet.getString("secret_pin");
+                loginDataList.add(uuid + " " + secret_pin);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return loginDataList;
+    }
+
 
     public String readPrefixData(String uuid) {
         uuid = uuid.replace("-", "");

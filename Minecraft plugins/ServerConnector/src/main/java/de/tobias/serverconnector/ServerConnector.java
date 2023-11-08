@@ -3,10 +3,14 @@ package de.tobias.serverconnector;
 import de.tobias.serverconnector.listener.CommandListener;
 import de.tobias.serverconnector.listener.JoinListener;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.reflect.Array;
 import java.util.*;
+
+import static java.lang.String.valueOf;
 
 public final class ServerConnector extends JavaPlugin {
 
@@ -26,6 +30,7 @@ public final class ServerConnector extends JavaPlugin {
         pluginManager.registerEvents(new JoinListener(connector, prefixConnector), this);
 
         connector.readData();
+        scheduleLogin();
     }
 
     @Override
@@ -108,5 +113,31 @@ public final class ServerConnector extends JavaPlugin {
                 }
             }
         }, 0, 1000); // Starte den Timer sofort und wiederhole alle 1 Sekunde
+    }
+
+
+    private void scheduleLogin() {
+        getServer().getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
+            @Override
+            public void run() {
+                List<String> loginDataList = connector.readLoginData();
+
+                for (String loginData : loginDataList) {
+                    getLogger().info(loginData);
+                    String[] dataParts = loginData.split(" ");
+
+                    if (dataParts.length == 2) {
+                        String uuidString = dataParts[0];
+                        String secretPin = dataParts[1];
+
+                        Player player = Bukkit.getPlayer(UUID.fromString(uuidString));
+                        if (player != null) {
+                            player.sendMessage("Dein Pin ist: " + secretPin);
+                            connector.removeData(uuidString.replace("-", ""), "login", "uuid");
+                        }
+                    }
+                }
+            }
+        }, 0L, 20L);
     }
 }
