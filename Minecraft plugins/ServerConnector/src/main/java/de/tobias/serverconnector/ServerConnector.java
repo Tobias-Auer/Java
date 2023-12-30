@@ -23,7 +23,6 @@ public final class ServerConnector extends JavaPlugin {
         connector = new SQLiteConnector();
         prefixConnector = new SQLiteConnector();
         connector.connect("./database_webserver/data.db");
-        prefixConnector.connect("./database_webserver/prefixes.db");
 
         getCommand("shutdown").setExecutor(new CommandListener(connector));
         PluginManager pluginManager = Bukkit.getPluginManager();

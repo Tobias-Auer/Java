@@ -113,11 +113,11 @@ public class SQLiteConnector {
 
     public String readPrefixData(String uuid) {
         uuid = uuid.replace("-", "");
-        String query = "SELECT prefix FROM main WHERE uuid = ?";
+        String query = "SELECT prefix FROM main WHERE members LIKE ?";
         getLogger().info("readPrefixData: " + uuid);
         try {
             PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, uuid);
+            statement.setString(1, "%" + uuid + "%");
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 String prefix = resultSet.getString("prefix");
@@ -129,5 +129,6 @@ public class SQLiteConnector {
         }
         return ""; // Return "" if no data is found
     }
+
 
 }

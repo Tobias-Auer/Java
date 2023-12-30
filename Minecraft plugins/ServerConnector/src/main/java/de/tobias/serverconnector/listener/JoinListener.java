@@ -9,7 +9,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-import java.util.UUID;
+import java.sql.SQLException;
 
 import static org.bukkit.Bukkit.getLogger;
 
@@ -17,14 +17,25 @@ import static org.bukkit.Bukkit.getLogger;
 public class JoinListener implements Listener {
 
     private final SQLiteConnector prefixConnector;
-    private boolean alreadyActivated;
     private final SQLiteConnector connector;
+    private boolean alreadyActivated;
+
+    public JoinListener(SQLiteConnector connector, SQLiteConnector prefixConnector) {
+        this.connector = connector;
+        this.prefixConnector = prefixConnector;
+        this.alreadyActivated = false;
+    }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent event) {
+    public void onJoin(PlayerJoinEvent event) throws SQLException {
         Player player = event.getPlayer();
 //        String prefix = "§4[PREFIX] ";
+
+        prefixConnector.connect("./database_webserver/prefixes.db");
         String prefix = prefixConnector.readPrefixData(player.getUniqueId().toString());
+        prefixConnector.disconnect();
+        getLogger().info("Neuer prefix: ");
+        getLogger().info(prefix);
 
         player.setDisplayName(prefix + player.getName());
         player.setPlayerListName(prefix + player.getName());
@@ -39,7 +50,7 @@ public class JoinListener implements Listener {
         team.addEntry(player.getName());
 
 
-        connector.insertData(event.getPlayer().getUniqueId()+"~online", "status", "status");
+        connector.insertData(event.getPlayer().getUniqueId() + "~online", "status", "status");
         if (!alreadyActivated) {
             connector.insertData("backup", "meta", "doAction");
             getLogger().info("Backup enabled");
@@ -47,15 +58,21 @@ public class JoinListener implements Listener {
         }
     }
 
-
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        connector.insertData(event.getPlayer().getUniqueId()+"~offline", "status", "status");
-    }
+        Player player = event.getPlayer();
 
-    public JoinListener(SQLiteConnector connector, SQLiteConnector prefixConnector) {
-        this.connector = connector;
-        this.prefixConnector = prefixConnector;
-        this.alreadyActivated = false;
+        // Hier setzt du den Spieler wieder auf den Standard-Prefix oder entfernst ihn aus dem Team
+        Scoreboard scoreboard = player.getScoreboard();
+        Team team = scoreboard.getTeam(player.getName());
+        if (team != null) {
+            team.setPrefix("");  // Setze den Prefix auf den Standardwert oder ""
+            team.removeEntry(player.getName());
+        }
+
+        // Setze den DisplayName und PlayerListName auf den Standardwert zurück
+        player.setDisplayName(player.getName());
+        player.setPlayerListName(player.getName());
+        connector.insertData(event.getPlayer().getUniqueId() + "~offline", "status", "status");
     }
 }
