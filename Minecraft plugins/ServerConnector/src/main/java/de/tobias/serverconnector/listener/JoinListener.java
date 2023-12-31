@@ -75,4 +75,5 @@ public class JoinListener implements Listener {
         player.setPlayerListName(player.getName());
         connector.insertData(event.getPlayer().getUniqueId() + "~offline", "status", "status");
     }
+
 }

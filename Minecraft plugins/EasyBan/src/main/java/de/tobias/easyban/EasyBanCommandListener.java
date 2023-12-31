@@ -17,14 +17,13 @@ import static org.bukkit.Bukkit.getLogger;
 import static org.bukkit.Bukkit.getPlayer;
 
 public class EasyBanCommandListener implements TabCompleter, CommandExecutor {
-    private final YamlConfiguration config;
-    private final File configFile;
     private final String[] reasons;
-
-    public EasyBanCommandListener(YamlConfiguration config, File configFile, EasyBan easyBan) {
+    private final SQLiteConnector connector;
+    private final YamlConfiguration config;
+    public EasyBanCommandListener(SQLiteConnector connector, YamlConfiguration config, EasyBan easyBan) {
         this.config = config;
-        this.configFile = configFile;
         this.reasons = new String[]{"Hacking", "Griefing", "Spam", "Advertisement", "Insult", "Disrespect", "Money trading", "Misinformation", "Other"};
+        this.connector = connector;
     }
 
 
@@ -42,7 +41,7 @@ public class EasyBanCommandListener implements TabCompleter, CommandExecutor {
 
             if (args.length == 1) {
                 HashMap<UUID, String> players = Util.getAllPlayers();
-                ArrayList<String> bannedUuids = new ArrayList<>(config.getKeys(false));
+                ArrayList<String> bannedUuids = connector.getAllBannedUuids();
                 for (String playerName : players.values()) {
                     OfflinePlayer offlineplayer = Bukkit.getOfflinePlayer(playerName);
                     if (!bannedUuids.contains(offlineplayer.getUniqueId().toString())) {
@@ -74,14 +73,13 @@ public class EasyBanCommandListener implements TabCompleter, CommandExecutor {
                 }
             }
             if (args.length == 1) {
-                Set<String> playerUuids = config.getKeys(false);
-                for (String playerUuid : playerUuids) {
+                ArrayList<String> bannedUuids = connector.getAllBannedUuids();
+                for (String playerUuid : bannedUuids) {
                     if (Util.isValidUUID(playerUuid)) {
                         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(playerUuid));
                         completions.add(offlinePlayer.getName());
                     }
                 }
-
             }
         }
 
@@ -99,14 +97,13 @@ public class EasyBanCommandListener implements TabCompleter, CommandExecutor {
         }
         if (command.getName().equals("ban")) {
             try {
-                ArrayList<String> list = new ArrayList<>();
                 Player player = getPlayer(args[0]);
                 OfflinePlayer offlinePlayer = null;
                 if (player == null) {
                     offlinePlayer = Bukkit.getOfflinePlayer(args[0]);
                 }
                 Player senderPlayer = getPlayer(sender.getName());
-                String reason = args[1];
+
                 int minutes = Integer.parseInt(args[2]);
                 int hours = Integer.parseInt(args[3]);
                 int days = Integer.parseInt(args[4]);
@@ -116,7 +113,7 @@ public class EasyBanCommandListener implements TabCompleter, CommandExecutor {
 
                 SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
                 format.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
-                String date = format.format(now);
+
 
                 Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
                 calendar.setTime(now);
@@ -125,20 +122,19 @@ public class EasyBanCommandListener implements TabCompleter, CommandExecutor {
                 calendar.add(Calendar.DAY_OF_MONTH, days);
                 calendar.add(Calendar.MONTH, months);
                 Date futureTime = calendar.getTime();
-                String future = format.format(futureTime);
 
-                list.add(senderPlayer.getUniqueId().toString());
-                list.add(reason);
-                list.add(date);
-                list.add(future);
-
+                String banned_uuid = "";
                 if (player != null) {
-                    config.set(String.valueOf(player.getUniqueId()), list);
+                    banned_uuid = String.valueOf(player.getUniqueId());
                 } else {
-                    config.set(String.valueOf(offlinePlayer.getUniqueId()), list);
+                    banned_uuid = String.valueOf(offlinePlayer.getUniqueId());
                 }
+                String admin_uuid = senderPlayer.getUniqueId().toString();
+                String reason = args[1];
+                String date = format.format(now);
+                String future = format.format(futureTime);
+                connector.insertBanEntry(banned_uuid, admin_uuid, reason, date, future);
 
-                config.save(configFile);
                 if (player != null && player.isOnline()) {
                     String message = config.get("ban-message").toString();
                     message = message.replace("{0}", reason);
@@ -163,14 +159,14 @@ public class EasyBanCommandListener implements TabCompleter, CommandExecutor {
             try {
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[0]);
                 String uuid = offlinePlayer.getUniqueId().toString();
-                if (config.getString(uuid) != null) {
-                    config.set(uuid, null);
+                try {
+                    connector.removeBanEntry(uuid);
                     sender.sendMessage("§2 Unbanned player: " + offlinePlayer.getName());
-                    config.save(configFile);
                     return true;
+                } catch (Exception e) {
+                    sender.sendMessage("§4[ERROR]Player not found or sth. else: " + e);
+                    return false;
                 }
-                sender.sendMessage("§4[ERROR]Player not found");
-                return false;
             } catch (Exception e) {
                 sender.sendMessage("§4[ERROR] " + e.getMessage());
                 return false;

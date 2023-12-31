@@ -1,6 +1,7 @@
 package de.tobias.easyban.listener;
 
 import de.tobias.easyban.EasyBan;
+import de.tobias.easyban.SQLiteConnector;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -19,11 +20,11 @@ import static org.bukkit.Bukkit.getLogger;
 
 public class EasyBanListener implements Listener {
     private final YamlConfiguration config;
-    private final File configFile;
+    private final SQLiteConnector connector;
 
-    public EasyBanListener(YamlConfiguration config, File configFile, EasyBan easyBan) {
+    public EasyBanListener(SQLiteConnector connector, YamlConfiguration config, EasyBan easyBan) {
         this.config = config;
-        this.configFile = configFile;
+        this.connector = connector;
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -37,13 +38,23 @@ public class EasyBanListener implements Listener {
     @EventHandler
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
         String uuid = event.getPlayer().getUniqueId().toString();
-        ArrayList<String> bannedPLayers = new ArrayList<String>(config.getKeys(false));
+        ArrayList<String> bannedPLayers = connector.getAllBannedUuids();
         if (bannedPLayers.contains(event.getPlayer().getUniqueId().toString())) {
-            String message = config.get("ban-message").toString();
-            message = message.replace("{0}", config.getStringList(uuid).get(1));
-            message = message.replace("{1}", config.getStringList(uuid).get(2));
 
-            String bannedUntilTimeString = config.getStringList(uuid).get(3);// ban time
+            Map<String, String> banEntryMap = connector.readBanEntry(uuid);
+            String banned_uuid = banEntryMap.get("uuid");
+            String admin_uuid = banEntryMap.get("admin");
+            String reason = banEntryMap.get("reason");
+            String start = banEntryMap.get("start");
+            String end = banEntryMap.get("end");
+            getLogger().info("Retrieved ban entry: " + banned_uuid + ", " + admin_uuid + ", " + reason + ", " + start + ", " + end);
+
+
+            String message = config.get("ban-message").toString();
+            message = message.replace("{0}", reason);
+            message = message.replace("{1}", start);
+
+            String bannedUntilTimeString = end;// ban time
 
 
             Date nowTimeObject = new Date();
@@ -56,8 +67,9 @@ public class EasyBanListener implements Listener {
             getLogger().info("Date until banned: "  + bannedUntilTimeString);
 
 
+
             message = message.replace("{2}", bannedUntilTimeString);
-            UUID adminUuid = UUID.fromString(config.getStringList(uuid).get(0));
+            UUID adminUuid = UUID.fromString(admin_uuid);
             message = message.replace("{3}", Bukkit.getOfflinePlayer(adminUuid).getName());
 
             try {
@@ -65,11 +77,10 @@ public class EasyBanListener implements Listener {
                 if (nowTimeObject.before(bannedUntilTimeObject)) {
                     event.getPlayer().kickPlayer(message);
                 } else if (nowTimeObject.after(bannedUntilTimeObject)) {
-                    config.set(uuid, null);
-                    config.save(configFile);
+                    connector.removeBanEntry(uuid);
                     event.getPlayer().sendTitle(config.getString("welcomeback-message1"), config.getString("welcomeback-message2"), 10, 250, 70);
                 }
-            } catch (ParseException | IOException e) {
+            } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
 
