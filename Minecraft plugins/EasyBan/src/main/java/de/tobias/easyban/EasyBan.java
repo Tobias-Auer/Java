@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 
@@ -33,8 +34,17 @@ public final class EasyBan extends JavaPlugin {
         getCommand("ban").setTabCompleter(new EasyBanCommandListener(connector, config, this));
         getCommand("unban").setTabCompleter(new EasyBanCommandListener(connector, config, this));
 
+        int delayTicks = 0;
+        int periodTicks = 5 * 20;
 
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                connector.checkForEntry(config);
+            }
+        }.runTaskTimer(this, delayTicks, periodTicks);
     }
+
 
     @Override
     public void onDisable() {

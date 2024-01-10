@@ -39,7 +39,7 @@ public class EasyBanListener implements Listener {
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
         String uuid = event.getPlayer().getUniqueId().toString();
         ArrayList<String> bannedPLayers = connector.getAllBannedUuids();
-        if (bannedPLayers.contains(event.getPlayer().getUniqueId().toString())) {
+        if (bannedPLayers.contains(uuid)) {
 
             Map<String, String> banEntryMap = connector.readBanEntry(uuid);
             String banned_uuid = banEntryMap.get("uuid");

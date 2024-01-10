@@ -102,8 +102,10 @@ public class EasyBanCommandListener implements TabCompleter, CommandExecutor {
                 if (player == null) {
                     offlinePlayer = Bukkit.getOfflinePlayer(args[0]);
                 }
-                Player senderPlayer = getPlayer(sender.getName());
-
+                Player senderPlayer = null;
+                if (sender instanceof Player) {
+                    senderPlayer = getPlayer(sender.getName());
+                }
                 int minutes = Integer.parseInt(args[2]);
                 int hours = Integer.parseInt(args[3]);
                 int days = Integer.parseInt(args[4]);
@@ -129,18 +131,25 @@ public class EasyBanCommandListener implements TabCompleter, CommandExecutor {
                 } else {
                     banned_uuid = String.valueOf(offlinePlayer.getUniqueId());
                 }
-                String admin_uuid = senderPlayer.getUniqueId().toString();
+                String admin_uuid = "4ebe5f6f-c231-4315-9d60-097c48cc6d30";
+                if (sender instanceof Player) {
+                    admin_uuid= senderPlayer.getUniqueId().toString();
+                }
                 String reason = args[1];
                 String date = format.format(now);
                 String future = format.format(futureTime);
                 connector.insertBanEntry(banned_uuid, admin_uuid, reason, date, future);
 
                 if (player != null && player.isOnline()) {
+                    String name = "_Tobias4444";
+                    if (sender instanceof Player) {
+                        name = senderPlayer.getName();
+                    }
                     String message = config.get("ban-message").toString();
                     message = message.replace("{0}", reason);
                     message = message.replace("{1}", date);
                     message = message.replace("{2}", future);
-                    message = message.replace("{3}", senderPlayer.getName());
+                    message = message.replace("{3}", name);
                     player.kickPlayer(message);
                     sender.sendMessage("§2[Info] Player " + player.getName() + " banned");
                 } else {

@@ -1,6 +1,8 @@
 package de.tobias.easyban;
 
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.logging.Level;
+
 import static org.bukkit.Bukkit.getLogger;
 public class SQLiteConnector {
 
@@ -46,6 +48,10 @@ public class SQLiteConnector {
             statement.setString(4, start);
             statement.setString(5, end);
             statement.executeUpdate();
+
+            query = "INSERT INTO status (mc_server_changed_sth) VALUES ('True')";
+            statement = connection.prepareStatement(query);
+            statement.executeUpdate();
             statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -56,6 +62,9 @@ public class SQLiteConnector {
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, uuid);
+            statement.executeUpdate();
+            query = "INSERT INTO status (mc_server_changed_sth) VALUES ('True')";
+            statement = connection.prepareStatement(query);
             statement.executeUpdate();
             statement.close();
         } catch (SQLException e) {
@@ -117,7 +126,58 @@ public class SQLiteConnector {
         return banEntryMap;
     }
 
+    public void checkForEntry(YamlConfiguration config) {
+        String query = "SELECT webserver_changed_sth FROM status";
+        try (PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
 
+            List<String> commandsToDelete = new ArrayList<>();
 
+            while (resultSet.next()) {
+                String full_command = resultSet.getString("webserver_changed_sth");
+                if (full_command == null) {
+                    continue;
+                }
+
+                String mode = full_command.split("~")[0];
+                String arguments = full_command.split("~")[1];
+
+                if (Objects.equals(mode, "add")) {
+                    String[] values = arguments.split(",");
+                    this.insertBanEntry(values[0], values[1], values[2], values[3], values[4]);
+                    Player player = Bukkit.getPlayer(java.util.UUID.fromString(values[0]));
+
+                    if (player != null) {
+                        String message = config.get("ban-message").toString();
+                        message = message.replace("{0}", values[2]);
+                        message = message.replace("{1}", values[3]);
+                        message = message.replace("{2}", values[4]);
+                        message = message.replace("{3}", Bukkit.getOfflinePlayer(java.util.UUID.fromString(values[1])).getName());
+                        player.kickPlayer(message);
+                    }
+
+                } else if (Objects.equals(mode, "remove")) {
+                    this.removeBanEntry(arguments);
+                }
+
+                getLogger().info("checkForEntry: " + full_command);
+                commandsToDelete.add(full_command);
+            }
+
+            query = "DELETE FROM status WHERE webserver_changed_sth = ?";
+            try (PreparedStatement deleteStatement = connection.prepareStatement(query)) {
+                for (String command : commandsToDelete) {
+                    deleteStatement.setString(1, command);
+                    deleteStatement.addBatch();
+                }
+                deleteStatement.executeBatch();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        } catch (SQLException e) {
+            getLogger().info(e.toString());
+        }
+    }
 
 }
