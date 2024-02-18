@@ -36,7 +36,7 @@ public class CommandListener implements CommandExecutor {
                     public void run() {
                         if (!eventCancel) {
                             // Broadcast und Ausführung von shutdown()
-                            Bukkit.broadcastMessage("Der Server wird jetzt heruntergefahren!");
+                            Bukkit.broadcastMessage("§4Der Server fährt in §5§b5§r §4Minuten herunter");
                             connector.insertData("shutdown", "meta", "doAction");
                             Bukkit.shutdown();
                         }
