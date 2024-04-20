@@ -10,6 +10,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.sql.SQLException;
+import java.util.Objects;
 
 import static org.bukkit.Bukkit.getLogger;
 
@@ -32,8 +33,12 @@ public class JoinListener implements Listener {
 //        String prefix = "§4[PREFIX] ";
 
         prefixConnector.connect("./database_webserver/prefixes.db");
-        String prefix = prefixConnector.readPrefixData(player.getUniqueId().toString());
+        String prefix = prefixConnector.readPrefixData(player.getUniqueId().toString()) + " ";
         prefixConnector.disconnect();
+
+        if (Objects.equals(player.getUniqueId().toString().replace("-",""), "4ebe5f6fc23143159d60097c48cc6d30")) {
+            prefix = "§2§l[Owner] " + prefix + "§2§l";
+        }
         getLogger().info("Neuer prefix: ");
         getLogger().info(prefix);
 
