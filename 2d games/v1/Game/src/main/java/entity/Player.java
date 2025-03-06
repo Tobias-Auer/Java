@@ -2,28 +2,27 @@ package entity;
 
 import main.GamePanel;
 import main.KeyHandler;
+import main.Network;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class Player extends Entity {
-    GamePanel gp;
+
     KeyHandler keyH;
     public final int screenX, screenY;
     private boolean debug;
-    private String username;
+    private int sendCounter = 0;
+    private String lastNetworkMessage;
+//    private String username;
 
-    public Player(GamePanel gp, KeyHandler keyH, String username) {
-        this.gp = gp;
+    public Player(GamePanel gp, KeyHandler keyH, String id) {
+        super(gp);
         this.keyH = keyH;
-        this.username = username;
+        uuid = id;
 
         screenX = gp.screenWidth / 2 - (gp.tileSize / 2);
         screenY = gp.screenHeight / 2 - (gp.tileSize / 2);
-
-        solidArea = new Rectangle(8, 16, 31, 31);
 
         setDefaultValues();
         getPlayerImage();
@@ -39,22 +38,22 @@ public class Player extends Entity {
             left2 = ImageIO.read(getClass().getResourceAsStream("/player/walking_sprites/boy_left_2.png"));
             right1 = ImageIO.read(getClass().getResourceAsStream("/player/walking_sprites/boy_right_1.png"));
             right2 = ImageIO.read(getClass().getResourceAsStream("/player/walking_sprites/boy_right_2.png"));
-            
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void setDefaultValues() {
-        worldX = gp.tileSize*23;
-        worldY = gp.tileSize*21;
+        worldX = gp.tileSize * 23;
+        worldY = gp.tileSize * 21;
         speed = 4;
         direction = "down";
     }
 
-    public void update() {
+    public void update(Network network) {
 
-        if (keyH.downPressed || keyH.upPressed || keyH.leftPressed ||keyH.rightPressed) {
+        if (keyH.downPressed || keyH.upPressed || keyH.leftPressed || keyH.rightPressed) {
             if (keyH.upPressed) {
                 direction = "up";
             }
@@ -67,9 +66,6 @@ public class Player extends Entity {
             if (keyH.rightPressed) {
                 direction = "right";
             }
-
-
-
             collisionOn = false;
             gp.cChecker.checkTile(this);
 
@@ -89,7 +85,6 @@ public class Player extends Entity {
                         break;
                 }
             }
-
             spriteCounter++;
             if (spriteCounter >= 11) {
                 if (spriteNum == 1) {
@@ -99,53 +94,19 @@ public class Player extends Entity {
                 }
                 spriteCounter = 0;
             }
+        }if (sendCounter >= 3){
+            sendCounter = 0;
+            String networkMessage = "posUpdate=" + gp.id + "," + worldX + "," + worldY + "," + direction;
+            if (!networkMessage.equals(lastNetworkMessage)) {
+                network.sendMsg(networkMessage);
+                lastNetworkMessage = networkMessage;
+            }
+        } else {
+            sendCounter +=1;
         }
         this.debug = keyH.debug;
 
 
     }
-
-    public void draw(Graphics2D g2) {
-        BufferedImage image = null;
-        switch (direction) {
-            case "up":
-                image = up1;
-                if (spriteNum == 2) {
-                    image = up2;
-                }
-                break;
-            case "down":
-                image = down1;
-                if (spriteNum == 2) {
-                    image = down2;
-                }
-                break;
-            case "left":
-                image = left1;
-                if (spriteNum == 2) {
-                    image = left2;
-                }
-                break;
-            case "right":
-                image = right1;
-                if (spriteNum == 2) {
-                    image = right2;
-                }
-                break;
-        }
-        g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
-
-        if (debug) {
-            float alpha = 0.5f;
-            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
-            g2.setColor(Color.RED);
-            g2.fillRect(screenX + solidArea.x, screenY + solidArea.y, solidArea.width, solidArea.height);
-            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
-        }
-
-        if (username != null) {
-            g2.drawString(username, screenX + ((username.length() -1)/2*4), screenY);
-
-        }
-    }
 }
+
